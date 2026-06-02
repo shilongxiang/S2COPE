@@ -109,11 +109,13 @@
       <div class="columns is-centered">
         <div class="column is-full">
           <figure class="image">
-            <img src="assets/scope_teaser.png" alt="S²COPE overview: self-supervised concept discovery via preference learning"
+            <img src="assets/scope_teaser.png" alt="Self-Supervised Visual Concept Discovery: contrastive black-box features vs. SCOPE's human-readable concepts"
                  style="max-width:88%; height:auto; display:block; margin:0 auto;">
             <figcaption style="max-width:820px; margin:0.9rem auto 0; text-align:left;">
-              <span class="tag-chip">No Labels</span>
-              VLLMs act as <strong>active participants</strong> in a self-supervised preference loop — hypothesizing candidate concepts, validating them against unlabeled images, and reinforcing the discriminative ones.
+              <span class="tag-chip">Figure 1</span>
+              <strong>Self-Supervised Visual Concept Discovery.</strong>
+              <strong>(Left)</strong> Standard contrastive learning yields discriminative but opaque, high-dimensional feature vectors — uninterpretable "black boxes."
+              <strong>(Right)</strong> S²COPE discovers explicitly interpretable concepts (e.g., <em>"bright yellow body"</em>) directly from unannotated images. By using a VLLM as a broad semantic prior, our self-supervised preference optimization loop grounds raw visual features into discrete, human-readable attributes — yielding transparent representations that improve classification accuracy on unseen data.
             </figcaption>
           </figure>
         </div>
@@ -141,17 +143,18 @@
         </div>
 
         <div style="margin:1rem 0 1.5rem;">
-          <span class="pill-tag">Natural images</span>
-          <span class="pill-tag">Medical imaging</span>
-          <span class="pill-tag">Physics</span>
-          <span class="pill-tag">Label-free</span>
-          <span class="pill-tag">VLLM</span>
+          <span class="pill-tag">iNaturalist</span>
+          <span class="pill-tag">CUB</span>
+          <span class="pill-tag">HAM10000</span>
+          <span class="pill-tag">MedMNIST</span>
+          <span class="pill-tag">Galaxy 10</span>
+          <span class="pill-tag">Gravity Spy</span>
         </div>
 
         <div class="columns is-mobile is-centered" style="margin-top:1rem;">
-          <div class="column is-one-third"><div class="stat-card"><div class="num">+24pt</div><div class="lbl">Top-1 Gain</div></div></div>
-          <div class="column is-one-third"><div class="stat-card"><div class="num">0</div><div class="lbl">Human Labels</div></div></div>
-          <div class="column is-one-third"><div class="stat-card"><div class="num">3</div><div class="lbl">Domains</div></div></div>
+          <div class="column is-one-third"><div class="stat-card"><div class="num">+24pt</div><div class="lbl">Max Top-1 Gain</div></div></div>
+          <div class="column is-one-third"><div class="stat-card"><div class="num">+16</div><div class="lbl">Avg Top-1 Gain</div></div></div>
+          <div class="column is-one-third"><div class="stat-card"><div class="num">8</div><div class="lbl">Datasets</div></div></div>
         </div>
       </div>
     </div>
@@ -163,15 +166,17 @@
   <div class="container is-max-desktop">
     <div class="columns is-centered">
       <div class="column is-full">
-        <h2 class="title is-3 has-text-centered">Method: Self-Supervised Preference Loop</h2>
-        <p class="subtitle is-5 has-text-centered" style="max-width:780px; margin:0 auto 1.5rem;">
-          The VLLM proposes candidate visual concepts, validates them on unlabeled imagery, and is then preference-tuned to amplify the discriminative ones — closing the loop without any human annotation.
+        <h2 class="title is-3 has-text-centered">The S²COPE Discovery Loop</h2>
+        <p class="subtitle is-5 has-text-centered" style="max-width:820px; margin:0 auto 1.5rem;">
+          A four-stage end-to-end self-supervised loop: <em>propose → reward → pair → preference-optimize</em>.
         </p>
         <figure class="image">
-          <img src="assets/scope_method.png" alt="S²COPE method overview"
+          <img src="assets/scope_method.png" alt="Overview of the S²COPE Discovery Loop"
                style="max-width:92%; height:auto; display:block; margin:0 auto; border-radius:8px;">
           <figcaption style="max-width:820px; margin:0.9rem auto 0; text-align:left;">
-            By amortizing concept discovery directly into the VLLM backbone via a preference objective — rather than relying on static generation and disjoint filtering — S²COPE compounds discovery and learning into a single training signal.
+            <span class="tag-chip">Figure 2</span>
+            <strong>Overview of the S²COPE Discovery Loop.</strong>
+            At iteration <em>k</em>, the VLLM policy <em>π<sub>k</sub></em> uses high-temperature sampling to <strong>hypothesize</strong> diverse candidate concepts <em>C(x)</em> for an unlabeled image <em>x</em>. A self-supervised, cross-modal contrastive reward <em>R(c, x)</em> grades each candidate on <strong>visual invariance</strong>: a concept earns high reward only if it stays stable across <em>augmented views</em> of the same image (positive set) while remaining <em>specific</em> against unrelated batch images (negative set). This automatically filters generic captions in favor of discriminative, structured attributes. An <strong>Easy-Negative pairing</strong> strategy (largest reward gap) converts rewards into preference pairs <em>(c<sub>w</sub>, c<sub>l</sub>)</em> to form dataset <em>𝒟<sub>k</sub></em>. <strong>DPO</strong> then internalizes this invariance, updating the VLLM into a refined policy <em>π<sub>k+1</sub></em> — iteratively transforming the VLLM into a self-supervised concept miner.
           </figcaption>
         </figure>
       </div>
@@ -186,30 +191,33 @@
       <div class="columns is-centered">
         <div class="column is-full">
           <h2 class="title is-3 has-text-centered">Discovered Concepts &amp; Results</h2>
-          <p class="subtitle is-5 has-text-centered" style="max-width:780px; margin:0 auto 1.5rem;">
-            S²COPE surfaces domain-specific concepts that standard VLLMs fail to articulate, translating into consistent downstream gains.
+          <p class="subtitle is-5 has-text-centered" style="max-width:820px; margin:0 auto 1.5rem;">
+            Training only on unlabeled <strong>iNaturalist-mini</strong>, the frozen S²COPE model improves concept-based linear-probing accuracy by an average of <strong>~16 points</strong> across 8 datasets, with the largest gains on the most out-of-domain targets:
+            <strong>+24.5%</strong> on BloodMNIST, <strong>+21.1%</strong> on OrganCMNIST, <strong>+20.2%</strong> on Gravity Spy.
           </p>
 
           <div class="card" style="border-radius:14px; box-shadow:0 12px 30px rgba(15,23,42,0.08); overflow:hidden;">
             <div class="card-image" style="background: linear-gradient(135deg,#eef1f8,#f8faff);">
               <figure class="image" style="padding:1.25rem; max-width:900px; margin:0 auto;">
-                <img src="assets/scope_vis.png" alt="Discovered concept visualizations" style="border-radius:10px;">
+                <img src="assets/scope_vis.png" alt="Side-by-side concepts: VLLM baseline (with incorrect attributes in red) vs S²COPE-optimized" style="border-radius:10px;">
               </figure>
             </div>
             <div class="card-content" style="padding:1rem 1.4rem 1.3rem;">
-              <p class="title is-5" style="margin-bottom:0.4rem;">Discovered Concepts Across Domains</p>
+              <p class="title is-5" style="margin-bottom:0.4rem;">Visualizing Self-Supervised Concept Discovery</p>
               <p class="content is-size-6" style="margin-bottom:0;">
-                Without any labels, S²COPE surfaces structured visual attributes that distinguish fine-grained classes — including cases where vanilla VLLM prompting fails to produce any usable concept.
+                For each sample, we contrast the top concepts produced by the VLLM <strong>baseline</strong> (top list) with those produced by our <strong>S²COPE-optimized</strong> model (bottom list). Concepts marked <span style="color:#c0392b; font-weight:600;">red</span> are incorrect for recognizing the image's category. After optimization, the model <em>suppresses nuisance concepts</em> and extracts precise, physically grounded attributes.
               </p>
             </div>
           </div>
 
           <div style="margin-top:2rem;">
             <figure class="image">
-              <img src="assets/scope_ablation.png" alt="Ablation study"
+              <img src="assets/scope_ablation.png" alt="Ablation on reward components and reward modality"
                    style="max-width:92%; height:auto; display:block; margin:0 auto; border-radius:8px;">
-              <figcaption style="max-width:820px; margin:0.9rem auto 0; text-align:center;">
-                Ablation: each component of the self-supervised preference loop contributes measurably to downstream accuracy.
+              <figcaption style="max-width:820px; margin:0.9rem auto 0; text-align:left;">
+                <span class="tag-chip">Ablation</span>
+                <strong>(a) Reward Components.</strong> Removing the <em>positive</em> signal causes performance collapse; removing the <em>negative</em> signal stalls at a suboptimal plateau — both contrastive sides are necessary.
+                <strong>(b) Reward Modality.</strong> Cross-modal image–text grounding beats unimodal text–text consensus: grounding concepts against the actual physical image features is what makes the discovered vocabulary discriminative.
               </figcaption>
             </figure>
           </div>
