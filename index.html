@@ -109,13 +109,13 @@
       <div class="columns is-centered">
         <div class="column is-full">
           <figure class="image">
-            <img src="assets/scope_teaser.png" alt="Self-Supervised Visual Concept Discovery: contrastive black-box features vs. SCOPE's human-readable concepts"
+            <img src="assets/scope_teaser.png" alt="Self-Supervised Visual Concept Discovery"
                  style="max-width:88%; height:auto; display:block; margin:0 auto;">
             <figcaption style="max-width:820px; margin:0.9rem auto 0; text-align:left;">
               <span class="tag-chip">Figure 1</span>
               <strong>Self-Supervised Visual Concept Discovery.</strong>
-              <strong>(Left)</strong> Standard contrastive learning yields discriminative but opaque, high-dimensional feature vectors — uninterpretable "black boxes."
-              <strong>(Right)</strong> S²COPE discovers explicitly interpretable concepts (e.g., <em>"bright yellow body"</em>) directly from unannotated images. By using a VLLM as a broad semantic prior, our self-supervised preference optimization loop grounds raw visual features into discrete, human-readable attributes — yielding transparent representations that improve classification accuracy on unseen data.
+              (Left) Standard contrastive learning yields discriminative but opaque, high-dimensional feature vectors that act as uninterpretable "black boxes."
+              (Right) In contrast, S²COPE discovers explicitly interpretable concepts (e.g., "bright yellow body") directly from unannotated images. By utilizing Vision-Large-Language Models as a broad semantic prior, our self-supervised preference optimization loop grounds raw visual features into discrete, human-readable attributes, yielding transparent representations that improve classification accuracy on unseen data.
             </figcaption>
           </figure>
         </div>
@@ -166,17 +166,14 @@
   <div class="container is-max-desktop">
     <div class="columns is-centered">
       <div class="column is-full">
-        <h2 class="title is-3 has-text-centered">The S²COPE Discovery Loop</h2>
-        <p class="subtitle is-5 has-text-centered" style="max-width:820px; margin:0 auto 1.5rem;">
-          A four-stage end-to-end self-supervised loop: <em>propose → reward → pair → preference-optimize</em>.
-        </p>
+        <h2 class="title is-3 has-text-centered">Method</h2>
         <figure class="image">
           <img src="assets/scope_method.png" alt="Overview of the S²COPE Discovery Loop"
                style="max-width:92%; height:auto; display:block; margin:0 auto; border-radius:8px;">
           <figcaption style="max-width:820px; margin:0.9rem auto 0; text-align:left;">
             <span class="tag-chip">Figure 2</span>
             <strong>Overview of the S²COPE Discovery Loop.</strong>
-            At iteration <em>k</em>, the VLLM policy <em>π<sub>k</sub></em> uses high-temperature sampling to <strong>hypothesize</strong> diverse candidate concepts <em>C(x)</em> for an unlabeled image <em>x</em>. A self-supervised, cross-modal contrastive reward <em>R(c, x)</em> grades each candidate on <strong>visual invariance</strong>: a concept earns high reward only if it stays stable across <em>augmented views</em> of the same image (positive set) while remaining <em>specific</em> against unrelated batch images (negative set). This automatically filters generic captions in favor of discriminative, structured attributes. An <strong>Easy-Negative pairing</strong> strategy (largest reward gap) converts rewards into preference pairs <em>(c<sub>w</sub>, c<sub>l</sub>)</em> to form dataset <em>𝒟<sub>k</sub></em>. <strong>DPO</strong> then internalizes this invariance, updating the VLLM into a refined policy <em>π<sub>k+1</sub></em> — iteratively transforming the VLLM into a self-supervised concept miner.
+            Our framework operates as an end-to-end, self-supervised discovery process. In iteration <em>k</em>, the VLLM policy <em>π<sub>k</sub></em> uses high-temperature sampling to hypothesize diverse candidate concepts <em>C(x)</em> for an unlabeled image <em>x</em>. To evaluate these proposals without human labels, we compute a self-supervised, cross-modal contrastive reward <em>R(c, x)</em> based on visual invariance. A candidate concept receives a high reward only if it is stable across augmented views (the positive set) while maintaining specificity against unrelated batch images. This automatically filters out generic, noisy descriptions (Answer A) in favor of discriminative, structured attributes (Answer B). An Easy-Negative pairing strategy (selecting pairs with the largest reward gap) converts these rewards into preference pairs <em>(c<sub>w</sub>, c<sub>l</sub>)</em> to form dataset <em>𝒟<sub>k</sub></em>. Finally, Direct Preference Optimization (DPO) internalizes this invariance by updating the VLLM concept generator's weights, yielding a refined policy <em>π<sub>k+1</sub></em> that iteratively transforms the VLLM into a self-supervised concept miner.
           </figcaption>
         </figure>
       </div>
@@ -190,34 +187,32 @@
     <div class="container is-max-desktop">
       <div class="columns is-centered">
         <div class="column is-full">
-          <h2 class="title is-3 has-text-centered">Discovered Concepts &amp; Results</h2>
-          <p class="subtitle is-5 has-text-centered" style="max-width:820px; margin:0 auto 1.5rem;">
-            Training only on unlabeled <strong>iNaturalist-mini</strong>, the frozen S²COPE model improves concept-based linear-probing accuracy by an average of <strong>~16 points</strong> across 8 datasets, with the largest gains on the most out-of-domain targets:
-            <strong>+24.5%</strong> on BloodMNIST, <strong>+21.1%</strong> on OrganCMNIST, <strong>+20.2%</strong> on Gravity Spy.
-          </p>
+          <h2 class="title is-3 has-text-centered">Results</h2>
 
           <div class="card" style="border-radius:14px; box-shadow:0 12px 30px rgba(15,23,42,0.08); overflow:hidden;">
             <div class="card-image" style="background: linear-gradient(135deg,#eef1f8,#f8faff);">
               <figure class="image" style="padding:1.25rem; max-width:900px; margin:0 auto;">
-                <img src="assets/scope_vis.png" alt="Side-by-side concepts: VLLM baseline (with incorrect attributes in red) vs S²COPE-optimized" style="border-radius:10px;">
+                <img src="assets/scope_vis.png" alt="Visualizing Self-Supervised Concept Discovery" style="border-radius:10px;">
               </figure>
             </div>
             <div class="card-content" style="padding:1rem 1.4rem 1.3rem;">
-              <p class="title is-5" style="margin-bottom:0.4rem;">Visualizing Self-Supervised Concept Discovery</p>
               <p class="content is-size-6" style="margin-bottom:0;">
-                For each sample, we contrast the top concepts produced by the VLLM <strong>baseline</strong> (top list) with those produced by our <strong>S²COPE-optimized</strong> model (bottom list). Concepts marked <span style="color:#c0392b; font-weight:600;">red</span> are incorrect for recognizing the image's category. After optimization, the model <em>suppresses nuisance concepts</em> and extracts precise, physically grounded attributes.
+                <strong>Visualizing Self-Supervised Concept Discovery.</strong>
+                For each sample, we contrast the top concepts generated by the VLLM baseline (top list) with our S²COPE-optimized model (bottom list).
+                <span style="color:#c0392b; font-weight:600;">Red</span> text indicates incorrect concepts for recognizing the image's category. S²COPE optimized model suppresses these nuisance concepts, extracting precise, physically grounded attributes.
               </p>
             </div>
           </div>
 
           <div style="margin-top:2rem;">
             <figure class="image">
-              <img src="assets/scope_ablation.png" alt="Ablation on reward components and reward modality"
+              <img src="assets/scope_ablation.png" alt="Ablation Studies on Reward Formulation"
                    style="max-width:92%; height:auto; display:block; margin:0 auto; border-radius:8px;">
               <figcaption style="max-width:820px; margin:0.9rem auto 0; text-align:left;">
                 <span class="tag-chip">Ablation</span>
-                <strong>(a) Reward Components.</strong> Removing the <em>positive</em> signal causes performance collapse; removing the <em>negative</em> signal stalls at a suboptimal plateau — both contrastive sides are necessary.
-                <strong>(b) Reward Modality.</strong> Cross-modal image–text grounding beats unimodal text–text consensus: grounding concepts against the actual physical image features is what makes the discovered vocabulary discriminative.
+                <strong>Ablation Studies on Reward Formulation.</strong>
+                <strong>(a) Reward Components:</strong> Impact of isolating the positive and negative signals of the contrastive reward. Eliminating the positive signal causes a performance collapse, while removing the negative signal yields a suboptimal accuracy plateau.
+                <strong>(b) Reward Modality:</strong> Comparison of cross-modal image-text grounding versus unimodal text-text consensus. Cross-modal grounding against physical image features achieves better performance than relying on unimodal textual consensus.
               </figcaption>
             </figure>
           </div>
