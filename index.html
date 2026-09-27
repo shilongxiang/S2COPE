@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="title" content="S²COPE: Self-Supervised Concept Discovery via Preference Learning">
-  <meta name="description" content="S²COPE discovers interpretable visual concepts from unlabeled data via self-supervised preference learning on Vision-Large-Language Models.">
+  <meta name="description" content="S²COPE learns human-readable visual concepts from unlabeled images via self-supervised preference learning on a vision-language model.">
   <meta name="keywords" content="concept discovery, interpretability, vision-language models, self-supervised learning, preference learning, S²COPE">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -38,6 +38,12 @@
     }
     .stat-card .num { font-family:'Google Sans',sans-serif; font-size:2.2rem; font-weight:700; color:#526db5; line-height:1; }
     .stat-card .lbl { margin-top:0.5rem; color:#5b5b66; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.08em; }
+    .results-table { font-size:0.9rem; margin:0 auto; }
+    .results-table th, .results-table td { text-align:center !important; vertical-align:middle !important; white-space:nowrap; }
+    .results-table td:first-child, .results-table th:first-child { text-align:left !important; }
+    .results-table tr.ours td { background:#eef1f8; font-weight:700; }
+    .results-table .gain { color:#3a76cd; font-weight:600; font-size:0.8em; }
+    h3.subtitle-sec { font-family:'Google Sans',sans-serif; font-size:1.35rem; font-weight:700; margin:2.5rem 0 1rem; text-align:center; }
     .tag-chip {
       display:inline-flex; align-items:center; padding:2px 12px; height:32px;
       background:#eef1f8; color:#3f538e; border-radius:3px;
@@ -110,8 +116,11 @@
             <figcaption style="max-width:820px; margin:0.9rem auto 0; text-align:left;">
               <span class="tag-chip">Figure 1</span>
               <strong>Self-Supervised Visual Concept Discovery.</strong>
-              (Left) Standard contrastive learning yields discriminative but opaque, high-dimensional feature vectors that act as uninterpretable "black boxes."
-              (Right) In contrast, S²COPE discovers explicitly interpretable concepts (e.g., "bright yellow body") directly from unannotated images. By utilizing Vision-Large-Language Models as a broad semantic prior, our self-supervised preference optimization loop grounds raw visual features into discrete, human-readable attributes, yielding transparent representations that improve classification accuracy on unseen data.
+              (Left) Standard self-supervised learning represents images as feature vectors, which are not directly understandable.
+              (Right) S²COPE learns to propose human-readable visual concepts from unlabeled images.
+              A pretrained vision-language model samples candidate concepts, and a contrastive objective evaluates how well they describe the source image and distinguish it from other images.
+              These scores define preferences for training the concept generator, without class labels or concept annotations.
+              The learned concepts support downstream prediction and provide an explicit vocabulary for inspecting model behavior.
             </figcaption>
           </figure>
         </div>
@@ -128,29 +137,33 @@
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
           <p>
-            Current representation learning paradigms force a fundamental compromise: self-supervised methods scale to massive datasets but yield opaque features, whereas interpretable models remain bottlenecked by the need for dense human annotation.
+            Self-supervised learning can learn useful representations from unlabeled images. Yet these representations remain largely opaque, making it difficult to understand what visual concepts they encode. Can self-supervision instead produce useful visual concepts that are directly understandable to people?
           </p>
           <p>
-            We introduce <strong>Self-Supervised Concept discOvery via Preference lEarning (S²COPE)</strong>, a label-free framework that resolves this dilemma. Instead of treating Vision-Large-Language Models (VLLMs) as static feature extractors, S²COPE leverages them as active participants in a self-supervised preference optimization loop. By autonomously hypothesizing, validating, and reinforcing candidate visual attributes directly from raw imagery, our framework discovers novel, structured concepts <em>without a single label</em>.
+            We introduce <strong>S²COPE</strong>, a framework that represents images as sets of concepts expressed in natural language. A vision-language model proposes candidate concepts, and a self-supervised objective evaluates how well each concept describes the source image while distinguishing it from other images. This feedback is used to construct preferences and train the model to propose better concepts.
           </p>
           <p>
-            Extensive experiments across natural, medical, and physics domains demonstrate that S²COPE successfully extracts domain-specific concepts where standard VLLMs often fail to generate. By amortizing concept discovery directly into the VLLM backbone through our self-supervised preference objective — rather than relying on static generation and disjoint filtering — we achieve up to a <span class="accent">24-point absolute improvement</span> in downstream top-1 classification accuracy on unseen data.
+            Across eight diverse visual datasets, our self-supervised concept representations transfer without adaptation and improve downstream recognition accuracy over prior interpretable approaches. In medical imaging, our discovered concepts reveal spurious visual cues and enable a more robust classifier. These results show that self-supervision can discover useful, human-readable visual representations from unlabeled images.
           </p>
         </div>
 
         <div style="margin:1rem 0 1.5rem;">
           <span class="pill-tag">iNaturalist</span>
           <span class="pill-tag">CUB</span>
-          <span class="pill-tag">HAM10000</span>
-          <span class="pill-tag">MedMNIST</span>
-          <span class="pill-tag">Galaxy 10</span>
+          <span class="pill-tag">Galaxy10</span>
           <span class="pill-tag">Gravity Spy</span>
+          <span class="pill-tag">HAM10000</span>
+          <span class="pill-tag">OrganCMNIST</span>
+          <span class="pill-tag">OrganMNIST3D</span>
+          <span class="pill-tag">FairFace</span>
+          <span class="pill-tag">ISIC</span>
         </div>
 
-        <div class="columns is-mobile is-centered" style="margin-top:1rem;">
-          <div class="column is-one-third"><div class="stat-card"><div class="num">+24pt</div><div class="lbl">Max Top-1 Gain</div></div></div>
-          <div class="column is-one-third"><div class="stat-card"><div class="num">+16</div><div class="lbl">Avg Top-1 Gain</div></div></div>
-          <div class="column is-one-third"><div class="stat-card"><div class="num">8</div><div class="lbl">Datasets</div></div></div>
+        <div class="columns is-mobile is-multiline is-centered" style="margin-top:1rem;">
+          <div class="column is-half-mobile is-one-quarter-tablet"><div class="stat-card"><div class="num">8/8</div><div class="lbl">Datasets Beat All Baselines</div></div></div>
+          <div class="column is-half-mobile is-one-quarter-tablet"><div class="stat-card"><div class="num">+7.37</div><div class="lbl">Avg Gain over Best Baseline</div></div></div>
+          <div class="column is-half-mobile is-one-quarter-tablet"><div class="stat-card"><div class="num">96.4%</div><div class="lbl">Human Preference</div></div></div>
+          <div class="column is-half-mobile is-one-quarter-tablet"><div class="stat-card"><div class="num">&minus;15.0</div><div class="lbl">Shortcut Error on ISIC</div></div></div>
         </div>
       </div>
     </div>
@@ -169,7 +182,10 @@
           <figcaption style="max-width:820px; margin:0.9rem auto 0; text-align:left;">
             <span class="tag-chip">Figure 2</span>
             <strong>Overview of the S²COPE Discovery Loop.</strong>
-            Our framework operates as an end-to-end, self-supervised discovery process. In iteration <em>k</em>, the VLLM policy <em>π<sub>k</sub></em> uses high-temperature sampling to hypothesize diverse candidate concepts <em>C(x)</em> for an unlabeled image <em>x</em>. To evaluate these proposals without human labels, we compute a self-supervised, cross-modal contrastive reward <em>R(c, x)</em> based on visual invariance. A candidate concept receives a high reward only if it is stable across augmented views (the positive set) while maintaining specificity against unrelated batch images. This automatically filters out generic, noisy descriptions (Answer A) in favor of discriminative, structured attributes (Answer B). An Easy-Negative pairing strategy (selecting pairs with the largest reward gap) converts these rewards into preference pairs <em>(c<sub>w</sub>, c<sub>l</sub>)</em> to form dataset <em>𝒟<sub>k</sub></em>. Finally, Direct Preference Optimization (DPO) internalizes this invariance by updating the VLLM concept generator's weights, yielding a refined policy <em>π<sub>k+1</sub></em> that iteratively transforms the VLLM into a self-supervised concept miner.
+            At iteration <em>k</em>, the generator <em>π<sub>k</sub></em> samples several descriptions for each unlabeled image.
+            A frozen CLIP model scores each description by how well it matches the source image relative to other images.
+            We pair higher- and lower-scoring descriptions with the largest score gaps and train the generator on these preferences using DPO.
+            The updated generator <em>π<sub>k+1</sub></em> then proposes candidates for the next iteration.
           </figcaption>
         </figure>
       </div>
@@ -185,27 +201,102 @@
         <div class="column is-full">
           <h2 class="title is-3 has-text-centered">Results</h2>
 
+          <h3 class="subtitle-sec" style="margin-top:0.5rem;">Cross-Domain Recognition</h3>
+          <div class="table-container">
+            <table class="table is-narrow is-hoverable results-table">
+              <thead>
+                <tr><th rowspan="2">Method</th><th rowspan="2">Labels</th><th colspan="2">Nature</th><th colspan="2">Physics</th><th colspan="3">Medical</th><th>Faces</th></tr>
+                <tr><th>iNaturalist</th><th>CUB</th><th>Galaxy10</th><th>Gravity Spy</th><th>HAM10000</th><th>OrganCMNIST</th><th>OrganMNIST3D</th><th>FairFace</th></tr>
+              </thead>
+              <tbody>
+                  <tr><td>TextSpan</td><td>&#10003;</td><td>20.00</td><td>81.08</td><td>24.07</td><td>4.25</td><td>17.10</td><td>7.40</td><td>12.42</td><td>50.95</td></tr>
+                  <tr><td>DCLIP</td><td>&#10003;</td><td>23.46</td><td>82.14</td><td>11.75</td><td>2.17</td><td>33.16</td><td>10.41</td><td>14.29</td><td>46.16</td></tr>
+                  <tr><td>LF-CBM</td><td>&#10003;</td><td>73.85</td><td>64.55</td><td>53.44</td><td>83.08</td><td>70.98</td><td>78.85</td><td>65.22</td><td>53.47</td></tr>
+                  <tr><td>LaBo</td><td>&#10003;</td><td>42.69</td><td>77.63</td><td>53.55</td><td>39.50</td><td>63.73</td><td>54.10</td><td>22.36</td><td>39.99</td></tr>
+                  <tr><td>VLLM (Unoptimized)</td><td>&#10007;</td><td>71.15</td><td>74.77</td><td>54.09</td><td>60.83</td><td>65.28</td><td>68.06</td><td>58.39</td><td>50.63</td></tr>
+                  <tr class="ours"><td>VLLM + S²COPE (Ours)</td><td>&#10007;</td><td>85.00<br><span class="gain">(+11.15)</span></td><td>85.11<br><span class="gain">(+2.97)</span></td><td>66.52<br><span class="gain">(+12.97)</span></td><td>83.55<br><span class="gain">(+0.47)</span></td><td>79.27<br><span class="gain">(+8.29)</span></td><td>91.43<br><span class="gain">(+12.58)</span></td><td>70.19<br><span class="gain">(+4.97)</span></td><td>59.01<br><span class="gain">(+5.54)</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="content is-size-6" style="max-width:820px; margin:0.5rem auto 0;">
+            <span class="tag-chip">Table 1</span>
+            <strong>Top-1 Concept-Based Classification Accuracy (%) Across Eight Datasets.</strong>
+            S²COPE fine-tunes a VLLM on unlabeled iNaturalist-mini images, which is then transferred to other datasets without adaptation. &ldquo;Labels&rdquo; indicates class-label or class-name use in concept construction. <span style="color:#3a76cd; font-weight:600;">Blue</span> values denote percentage-point gains over the best of the four concept-based baselines per dataset. S²COPE outperforms these baselines on all eight datasets, with an average gain of 7.37 percentage points.
+          </p>
+
+          <h3 class="subtitle-sec">Concepts Before and After Learning</h3>
           <div class="card" style="border-radius:14px; box-shadow:0 12px 30px rgba(15,23,42,0.08); overflow:hidden;">
             <div class="card-image" style="background: linear-gradient(135deg,#eef1f8,#f8faff);">
               <figure class="image" style="padding:1.25rem; max-width:900px; margin:0 auto;">
-                <img src="assets/scope_vis.png" alt="Visualizing Self-Supervised Concept Discovery" style="border-radius:10px;">
+                <img src="assets/scope_vis.png" alt="Concepts Before and After Learning" style="border-radius:10px;">
               </figure>
             </div>
             <div class="card-content" style="padding:1rem 1.4rem 1.3rem;">
               <p class="content is-size-6" style="margin-bottom:0;">
-                <strong>Visualizing Self-Supervised Concept Discovery.</strong>
-                For each sample, we contrast the top concepts generated by the VLLM baseline (top list) with our S²COPE-optimized model (bottom list).
-                <span style="color:#c0392b; font-weight:600;">Red</span> text indicates incorrect concepts for recognizing the image's category. S²COPE optimized model suppresses these nuisance concepts, extracting precise, physically grounded attributes.
+                <span class="tag-chip">Figure 3</span>
+                <strong>Concepts Before and After Learning.</strong>
+                For each image, we compare concepts from the pretrained generator (top list) and S²COPE (bottom list).
+                <span style="color:#c0392b; font-weight:600;">Red</span> marks concepts that are incorrect or uninformative for the category.
               </p>
             </div>
           </div>
 
-          <div style="margin-top:2rem;">
+          <h3 class="subtitle-sec">Pairwise Preference Evaluation</h3>
+          <div class="table-container">
+            <table class="table is-narrow results-table">
+              <thead>
+                <tr><th>Evaluator</th><th colspan="5">GPT-5.6-Sol</th><th>Human</th></tr>
+                <tr><th>Opponent</th><th>Unoptimized VLLM</th><th>TextSpan</th><th>DCLIP</th><th>LF-CBM</th><th>LaBo</th><th>Unoptimized VLLM</th></tr>
+              </thead>
+              <tbody>
+                <tr class="ours"><td>S²COPE preference</td><td>85.9</td><td>98.7</td><td>96.2</td><td>89.7</td><td>98.7</td><td>96.41</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="content is-size-6" style="max-width:820px; margin:0.5rem auto 0;">
+            <span class="tag-chip">Table 2</span>
+            <strong>Pairwise Preference Win Rate for S²COPE Concepts (%).</strong>
+            For each opponent, we report the percentage of the 39 images for which the evaluator prefers S²COPE's anonymized concept list over the opponent's.
+            GPT-5.6-Sol compares S²COPE against five baselines, while human evaluators compare S²COPE against the unoptimized VLLM, with results averaged across evaluators.
+          </p>
+
+          <h3 class="subtitle-sec">Discovering and Mitigating Spurious Correlations</h3>
+          <p class="content has-text-justified" style="max-width:820px; margin:0 auto 1rem;">
+            On ISIC dermoscopy, colored calibration patches are spuriously associated with benign lesions. Without being supplied artifact names or patch annotations, the learned generator produces concepts such as &ldquo;orange circular marker,&rdquo; &ldquo;green circular patch,&rdquo; and &ldquo;round sticker-like texture,&rdquo; exposing the confounder. Filtering the affected training images with these concepts and retraining the linear probe reduces the patch-induced error rate on malignant images from 74.9% to 59.9%.
+          </p>
+          <figure class="image" style="max-width:640px; margin:0 auto;">
+            <img src="assets/scope_isic.png" alt="Concept-Guided Shortcut Mitigation" style="border-radius:8px;">
+          </figure>
+          <p class="content is-size-6" style="max-width:820px; margin:0.5rem auto 0;">
+            <span class="tag-chip">Figure 4</span>
+            <strong>Concept-Guided Shortcut Mitigation.</strong>
+            Adding a patch causes this malignant image to be misclassified as benign. &ldquo;+ S²COPE&rdquo; denotes concept-guided data curation and probe retraining, which preserve the correct prediction. S²COPE enables targeted data curation that removes bias in the data.
+          </p>
+          <div class="table-container" style="margin-top:1.2rem;">
+            <table class="table is-narrow results-table">
+              <thead>
+                <tr><th rowspan="2">Setting</th><th colspan="2">Patch detection (%)</th><th rowspan="2">Error rate (%) &darr;</th></tr>
+                <tr><th>Precision</th><th>Recall</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>VLLM (Unoptimized)</td><td>&mdash;</td><td>&mdash;</td><td>74.9</td></tr>
+                <tr class="ours"><td>VLLM + S²COPE</td><td>95.5</td><td>83.4</td><td>59.9</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="content is-size-6" style="max-width:820px; margin:0.5rem auto 0;">
+            <span class="tag-chip">Table 3</span>
+            <strong>Concept-Guided Shortcut Mitigation on ISIC.</strong>
+            S²COPE identifies affected training images; removing them and retraining the linear probe reduces the patch-induced error rate from 74.9% to 59.9%.
+          </p>
+
+          <h3 class="subtitle-sec">Ablations</h3>
+          <div>
             <figure class="image">
               <img src="assets/scope_ablation.png" alt="Ablation Studies on Reward Formulation"
                    style="max-width:92%; height:auto; display:block; margin:0 auto; border-radius:8px;">
               <figcaption style="max-width:820px; margin:0.9rem auto 0; text-align:left;">
-                <span class="tag-chip">Ablation</span>
+                <span class="tag-chip">Figure 5</span>
                 <strong>Ablation Studies on Reward Formulation.</strong>
                 <strong>(a) Reward Components:</strong> Impact of isolating the positive and negative signals of the contrastive reward. Eliminating the positive signal causes a performance collapse, while removing the negative signal yields a suboptimal accuracy plateau.
                 <strong>(b) Reward Modality:</strong> Comparison of cross-modal image-text grounding versus unimodal text-text consensus. Cross-modal grounding against physical image features achieves better performance than relying on unimodal textual consensus.
